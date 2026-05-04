@@ -31,3 +31,39 @@ export type AnalysisResult = {
   weakProjects: string[];
   suggestions: Suggestion[];
 };
+
+export type ResumeProject = {
+  name: string;
+  tech: string;
+  description: string;
+  impact: string;
+};
+
+export type ResumeExperience = {
+  role: string;
+  company: string;
+  duration: string;
+  bullets: string;
+};
+
+export type ResumeBuilderData = {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  linkedin: string;
+  github: string;
+  targetRole: string;
+  summary: string;
+  skills: string;
+  projects: ResumeProject[];
+  experience: ResumeExperience[];
+  education: string;
+  certifications: string;
+};
+
+export type AiInsight = {
+  title: string;
+  detail: string;
+  priority: "High" | "Medium" | "Low";
+};

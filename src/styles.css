@@ -17,6 +17,7 @@ body {
 }
 
 button,
+input,
 textarea {
   font: inherit;
 }
@@ -155,7 +156,8 @@ h3 {
 
 .input-grid,
 .comparison-grid,
-.review-flow {
+.review-flow,
+.builder-grid {
   display: grid;
   gap: 16px;
 }
@@ -168,7 +170,9 @@ h3 {
 .editor-panel,
 .suggestion-panel,
 .insights-panel,
-.resume-preview {
+.resume-preview,
+.builder-panel,
+.ai-architecture {
   background: #ffffff;
   border: 1px solid #dce5df;
   border-radius: 8px;
@@ -229,6 +233,69 @@ textarea {
   padding: 16px;
   resize: vertical;
   width: 100%;
+}
+
+input {
+  border: 1px solid #dce5df;
+  border-radius: 8px;
+  color: #26322e;
+  min-height: 42px;
+  outline: none;
+  padding: 0 12px;
+  width: 100%;
+}
+
+input:focus,
+textarea:focus {
+  box-shadow: inset 0 0 0 2px #8bd6bf;
+}
+
+.builder-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.75fr);
+  margin-bottom: 16px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 16px;
+}
+
+.form-grid textarea {
+  border: 1px solid #dce5df;
+  min-height: 88px;
+}
+
+.form-grid textarea:nth-of-type(1),
+.form-grid textarea:nth-of-type(2),
+.form-grid textarea:nth-of-type(3) {
+  grid-column: 1 / -1;
+}
+
+.dynamic-section {
+  border-top: 1px solid #e5ece7;
+  padding: 16px;
+}
+
+.dynamic-section h2 {
+  margin-bottom: 12px;
+}
+
+.mini-form {
+  background: #f7faf8;
+  border: 1px solid #e0e8e2;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.mini-form textarea {
+  border: 1px solid #dce5df;
+  min-height: 74px;
 }
 
 .review-flow {
@@ -341,6 +408,45 @@ pre {
   padding-left: 18px;
 }
 
+.ai-list {
+  display: grid;
+  gap: 10px;
+}
+
+.ai-list article {
+  background: #f7faf8;
+  border: 1px solid #e0e8e2;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.ai-list span {
+  color: #0b7a68;
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.ai-list strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.ai-list p {
+  color: #53615c;
+  font-size: 0.88rem;
+  margin-bottom: 0;
+}
+
+.ai-architecture {
+  margin-bottom: 16px;
+}
+
+.ai-architecture p {
+  white-space: pre-line;
+}
+
 .comparison-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -396,7 +502,8 @@ pre {
   .score-grid,
   .input-grid,
   .review-flow,
-  .comparison-grid {
+  .comparison-grid,
+  .builder-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -411,6 +518,11 @@ pre {
   }
 
   .diff-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid,
+  .mini-form {
     grid-template-columns: 1fr;
   }
 
