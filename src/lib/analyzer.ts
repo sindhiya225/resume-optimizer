@@ -80,7 +80,7 @@ const extractProjects = (resume: string) => {
 };
 
 const replaceOnce = (content: string, before: string, after: string) => {
-  if (!before) return content;
+  if (!before) return `${content.trim()}\n\n${after.trim()}`.trim();
   return content.includes(before) ? content.replace(before, after) : content;
 };
 

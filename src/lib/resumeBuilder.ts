@@ -11,6 +11,7 @@ const section = (title: string, content: string[]) =>
 
 export const emptyBuilderData: ResumeBuilderData = {
   name: "Aarav Mehta",
+  age: "",
   email: "aarav.mehta@email.com",
   phone: "+91 98765 43210",
   location: "Coimbatore, India",

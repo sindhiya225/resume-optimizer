@@ -48,6 +48,7 @@ export type ResumeExperience = {
 
 export type ResumeBuilderData = {
   name: string;
+  age: string;
   email: string;
   phone: string;
   location: string;

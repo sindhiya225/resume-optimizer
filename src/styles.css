@@ -614,6 +614,10 @@ pre {
   padding: 12px;
 }
 
+.status-message.inline {
+  margin: 0 16px 16px;
+}
+
 .provider-label {
   color: #0b7a68;
   font-weight: 800;

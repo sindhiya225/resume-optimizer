@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { analyzeResume, applySuggestion } from "./lib/analyzer";
 import { exportDocx, exportPdf } from "./lib/exporters";
+import { parseUploadedFile } from "./lib/fileParser";
 import { buildResumeFromData } from "./lib/resumeBuilder";
 import { ResumeBuilderData, Suggestion } from "./types";
 
@@ -21,6 +22,7 @@ type Page = "welcome" | "build" | "optimize";
 
 const emptyProfile: ResumeBuilderData = {
   name: "",
+  age: "",
   email: "",
   phone: "",
   location: "",
@@ -40,12 +42,6 @@ type AiResponse = {
   resume: string;
   suggestions: Suggestion[];
   error?: string;
-};
-
-const readTextFile = (file: File, onLoad: (value: string) => void) => {
-  const reader = new FileReader();
-  reader.onload = () => onLoad(String(reader.result ?? ""));
-  reader.readAsText(file);
 };
 
 const suggestionLabels: Record<Suggestion["type"], string> = {
@@ -70,6 +66,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [aiProvider, setAiProvider] = useState("");
+  const [fileStatus, setFileStatus] = useState("");
 
   const analysis = useMemo(
     () => analyzeResume(optimizedResume || currentResume, jobDescription),
@@ -89,6 +86,7 @@ function App() {
     setIsApproved(false);
     setMessage("");
     setAiProvider("");
+    setFileStatus("");
   };
 
   const goHome = () => {
@@ -101,6 +99,18 @@ function App() {
 
   const updateProfile = <K extends keyof ResumeBuilderData>(key: K, value: ResumeBuilderData[K]) =>
     setProfile((current) => ({ ...current, [key]: value }));
+
+  const handleUpload = async (file: File | undefined, setter: (value: string) => void) => {
+    if (!file) return;
+    setFileStatus(`Reading ${file.name}...`);
+    try {
+      const text = await parseUploadedFile(file);
+      setter(text);
+      setFileStatus(`Loaded ${file.name}`);
+    } catch (error) {
+      setFileStatus(error instanceof Error ? error.message : "Unable to parse the uploaded file.");
+    }
+  };
 
   const callAi = async (mode: "build" | "optimize") => {
     setLoading(true);
@@ -203,7 +213,7 @@ function App() {
               </div>
               <div className="form-grid">
                 <label>Name : <input value={profile.name} onChange={(event) => updateProfile("name", event.target.value)} /></label>
-                <label>Age : <input /></label>
+                <label>Age : <input value={profile.age} onChange={(event) => updateProfile("age", event.target.value)} /></label>
                 <label>Email : <input value={profile.email} onChange={(event) => updateProfile("email", event.target.value)} /></label>
                 <label>Phone : <input value={profile.phone} onChange={(event) => updateProfile("phone", event.target.value)} /></label>
                 <label>Address / Location : <input value={profile.location} onChange={(event) => updateProfile("location", event.target.value)} /></label>
@@ -253,14 +263,12 @@ function App() {
                   <h2>Job Description Attachment / Text :</h2>
                   <label className="icon-upload" title="Upload job description text">
                     <Upload size={17} />
-                    <input type="file" accept=".txt,.md" onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) readTextFile(file, setJobDescription);
-                    }} />
+                    <input type="file" accept=".pdf,.docx,.txt,.md" onChange={(event) => handleUpload(event.target.files?.[0], setJobDescription)} />
                   </label>
                 </div>
                 <textarea value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} />
               </div>
+              {fileStatus && <p className="status-message inline">{fileStatus}</p>}
 
               <div className="approval-actions padded">
                 <button className="primary-button" disabled={loading || !jobDescription.trim()} onClick={() => callAi("build")}>
@@ -294,10 +302,7 @@ function App() {
                   <h2>Present Resume Attachment / Text :</h2>
                   <label className="icon-upload" title="Upload resume text">
                     <Upload size={17} />
-                    <input type="file" accept=".txt,.md" onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) readTextFile(file, setCurrentResume);
-                    }} />
+                    <input type="file" accept=".pdf,.docx,.txt,.md" onChange={(event) => handleUpload(event.target.files?.[0], setCurrentResume)} />
                   </label>
                 </div>
                 <textarea value={currentResume} onChange={(event) => setCurrentResume(event.target.value)} />
@@ -308,14 +313,12 @@ function App() {
                   <h2>Job Description Attachment / Text :</h2>
                   <label className="icon-upload" title="Upload job description text">
                     <Upload size={17} />
-                    <input type="file" accept=".txt,.md" onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) readTextFile(file, setJobDescription);
-                    }} />
+                    <input type="file" accept=".pdf,.docx,.txt,.md" onChange={(event) => handleUpload(event.target.files?.[0], setJobDescription)} />
                   </label>
                 </div>
                 <textarea value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} />
               </div>
+              {fileStatus && <p className="status-message inline">{fileStatus}</p>}
 
               <div className="approval-actions padded">
                 <button className="primary-button" disabled={loading || !currentResume.trim() || !jobDescription.trim()} onClick={() => callAi("optimize")}>

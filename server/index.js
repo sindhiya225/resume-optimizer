@@ -7,6 +7,25 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
 const distDir = path.join(rootDir, "dist");
+
+const loadEnv = async () => {
+  const envPath = path.join(rootDir, ".env");
+  if (!existsSync(envPath)) return;
+  const lines = (await readFile(envPath, "utf8")).split(/\r?\n/);
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) return;
+    const separator = trimmed.indexOf("=");
+    if (separator === -1) return;
+    const key = trimmed.slice(0, separator).trim();
+    const value = trimmed.slice(separator + 1).trim().replace(/^["']|["']$/g, "");
+    if (key && !process.env[key]) process.env[key] = value;
+  });
+};
+
+await loadEnv();
+
 const port = Number(process.env.PORT || 8787);
 const geminiModel = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
 
@@ -42,21 +61,77 @@ const extractJson = (text) => {
   return JSON.parse(clean.slice(start, end + 1));
 };
 
-const fallbackSuggestion = (resume, jobDescription) => ({
+const topKeywords = (jobDescription) =>
+  Array.from(
+    new Set(
+      jobDescription
+        .toLowerCase()
+        .replace(/[^a-z0-9+#.\s-]/g, " ")
+        .split(/\s+/)
+        .filter((word) => word.length > 4)
+        .filter((word) => !["about", "looking", "directly", "intern", "across", "block", "hands"].includes(word)),
+    ),
+  ).slice(0, 8);
+
+const fallbackSuggestion = (resume, jobDescription, mode, profile = {}) => {
+  const keywords = topKeywords(jobDescription);
+  const baseResume = mode === "build" ? [
+    profile.name,
+    profile.targetRole,
+    [profile.email, profile.phone, profile.location, profile.linkedin, profile.github].filter(Boolean).join(" | "),
+    "SUMMARY",
+    profile.summary || `Aspiring ${profile.targetRole || "technology"} professional with interest in ${keywords.slice(0, 4).join(", ")}.`,
+    "SKILLS",
+    profile.skills || keywords.join(", "),
+    "PROJECTS",
+    ...(profile.projects || []).flatMap((project) => project.name ? [
+      `${project.name} | ${project.tech || "Relevant technologies"}`,
+      `- ${project.description || "Built a role-relevant technical project."}`,
+      `- ${project.impact || "Focused on practical execution and measurable learning outcomes."}`,
+    ] : []),
+    "EDUCATION",
+    profile.education || "",
+    "CERTIFICATIONS",
+    profile.certifications || "",
+  ].filter(Boolean).join("\n") : resume;
+
+  return {
   aiProvider: "Local fallback",
-  resume,
+  resume: baseResume,
   suggestions: [
     {
       id: "fallback-summary",
       type: "summary",
-      title: "Add job-specific keywords",
-      rationale: "Gemini is not configured, so this local fallback suggests adding role keywords from the job description.",
-      before: resume.split("\n").find((line) => line.length > 45) || resume.split("\n")[0] || "",
-      after: `${resume.split("\n").find((line) => line.length > 45) || "Professional summary"} aligned with ${jobDescription.split(/\s+/).slice(0, 8).join(" ")}.`,
+      title: "Use targeted role keywords",
+      rationale: "Gemini is not configured, so this local fallback only gives a safe keyword recommendation instead of rewriting personal details.",
+      before: "",
+      after: `Include relevant terms naturally where truthful: ${keywords.join(", ")}.`,
       confidence: 0.62,
     },
   ],
-});
+  };
+};
+
+const validateAiResult = (result, mode, originalResume) => {
+  if (!result || typeof result !== "object") throw new Error("AI response was not an object.");
+  if (typeof result.resume !== "string") result.resume = mode === "optimize" ? originalResume || "" : "";
+  if (!Array.isArray(result.suggestions)) result.suggestions = [];
+
+  result.suggestions = result.suggestions
+    .filter((suggestion) => suggestion && typeof suggestion === "object")
+    .map((suggestion, index) => ({
+      id: String(suggestion.id || `ai-${index}`),
+      type: ["keyword", "impact", "project", "format", "summary"].includes(suggestion.type) ? suggestion.type : "summary",
+      title: String(suggestion.title || "AI suggestion"),
+      rationale: String(suggestion.rationale || "Suggested by AI to improve role alignment."),
+      before: String(suggestion.before || ""),
+      after: String(suggestion.after || ""),
+      confidence: Number.isFinite(Number(suggestion.confidence)) ? Number(suggestion.confidence) : 0.75,
+    }))
+    .filter((suggestion) => suggestion.after.trim());
+
+  return result;
+};
 
 const callGemini = async (prompt) => {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -88,7 +163,7 @@ const callGemini = async (prompt) => {
   return extractJson(text);
 };
 
-const buildPrompt = (payload) => `You are an ATS resume expert.
+const buildPrompt = (payload) => `You are a senior technical recruiter and ATS resume writer.
 Return strict JSON only.
 Schema:
 {
@@ -107,10 +182,14 @@ Schema:
 }
 Rules:
 - Do not invent fake companies, degrees, awards, or metrics.
-- Improve wording, keyword alignment, project relevance, and ATS readability.
-- Keep the resume truthful and concise.
-- For optimize mode, suggestions must be atomic one-by-one changes.
-- For build mode, create a complete resume from the provided fields and include suggestions explaining important choices.
+- Never append raw job-description sentences to contact links, names, emails, phone numbers, addresses, LinkedIn, or GitHub lines.
+- Do not copy the job description verbatim into the resume.
+- Convert job description themes into truthful resume keywords, skills, and bullets.
+- Use concise ATS-readable sections: SUMMARY, SKILLS, PROJECTS, EXPERIENCE, EDUCATION, CERTIFICATIONS.
+- Keep wording truthful. If metrics are not provided, do not fabricate numbers.
+- For optimize mode, return the original resume in "resume" and atomic one-by-one changes in "suggestions"; the frontend applies changes after user approval.
+- For build mode, return a complete optimized resume in "resume" and suggestions explaining major choices.
+- If a section is missing, suggest adding it instead of corrupting unrelated text.
 
 Mode: ${payload.mode}
 Job description:
@@ -130,10 +209,11 @@ const handleAi = async (request, response) => {
 
     try {
       result = await callGemini(prompt);
+      result = validateAiResult(result, payload.mode, payload.resume || "");
       result.aiProvider = `Google Gemini (${geminiModel})`;
     } catch (error) {
       if (process.env.GEMINI_API_KEY) throw error;
-      result = fallbackSuggestion(payload.resume || "", payload.jobDescription || "");
+      result = fallbackSuggestion(payload.resume || "", payload.jobDescription || "", payload.mode, payload.profile || {});
     }
 
     json(response, 200, result);

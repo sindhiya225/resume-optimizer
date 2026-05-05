@@ -7,9 +7,10 @@ server.listen(apiPort, "127.0.0.1", () => {
   console.log(`API running at http://127.0.0.1:${apiPort}`);
 });
 
-const vite = spawn("npm.cmd", ["run", "dev"], {
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const vite = spawn(npmCommand, ["run", "dev"], {
   stdio: "inherit",
-  shell: false,
+  shell: process.platform === "win32",
 });
 
 const shutdown = () => {

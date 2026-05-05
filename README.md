@@ -12,7 +12,7 @@ The main feature is AI integration through a backend Gemini API proxy. The front
 - Welcome page with two clear options.
 - Scratch resume builder with explicit fields such as Name, Age, Email, Phone, Address, Skills, Projects, Academic Details, Certifications, and Job Description.
 - Existing resume optimizer with empty resume and job description inputs.
-- Text/Markdown upload support for resume and job description attachments.
+- PDF, DOCX, TXT, and Markdown upload support for resume and job description attachments.
 - Google Gemini AI backend integration.
 - AI-generated resume creation for the builder flow.
 - AI-generated one-by-one suggestions for the optimizer flow.
@@ -30,6 +30,8 @@ The AI key is read from:
 ```bash
 GEMINI_API_KEY
 ```
+
+The backend automatically loads `.env` before calling Gemini.
 
 The frontend calls:
 
@@ -59,6 +61,8 @@ API keys must not be placed inside React code because browser code is public. Th
 - **Lucide React**: Icons.
 - **jsPDF**: PDF export.
 - **docx**: Word document export.
+- **pdfjs-dist**: Extracts readable text from uploaded PDF resumes and job descriptions.
+- **mammoth**: Extracts readable text from uploaded DOCX files.
 - **Custom analyzer**: ATS-style score calculation.
 
 ## Workflow
@@ -117,6 +121,19 @@ Open:
 http://127.0.0.1:5173
 ```
 
+If `5173` is already in use, Vite will print another URL such as:
+
+```bash
+http://127.0.0.1:5174
+```
+
+You can also run the app in two terminals:
+
+```bash
+npm run api
+npm run dev
+```
+
 ## Production
 
 ```bash
@@ -165,11 +182,11 @@ The score is a heuristic based on job keyword overlap, measurable bullet impact,
 
 ### What are the limitations?
 
-The ATS score is not an actual company ATS algorithm. File parsing is limited to text and markdown. AI quality depends on the prompt and Gemini response.
+The ATS score is not an actual company ATS algorithm. The app can parse text-based PDFs and DOCX files, but scanned image-only PDFs need OCR, which is not included yet. AI quality depends on the prompt, Gemini response, and accuracy of user-provided details.
 
 ### What would you improve next?
 
-- PDF/DOCX upload parsing.
+- OCR for scanned PDFs.
 - Authentication.
 - Saved resume versions.
 - Multiple resume templates.
