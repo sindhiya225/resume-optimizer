@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "api": "node server/index.js",
+    "dev:full": "node server/dev.js",
     "build": "tsc -b && vite build",
+    "start": "node server/index.js",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

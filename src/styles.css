@@ -55,6 +55,50 @@ button:disabled {
   max-width: 1440px;
 }
 
+.welcome-page {
+  align-content: center;
+  display: grid;
+  gap: 32px;
+  min-height: calc(100vh - 48px);
+}
+
+.welcome-page h1 {
+  max-width: 980px;
+}
+
+.choice-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choice-button {
+  align-items: flex-start;
+  background: #ffffff;
+  border: 1px solid #dce5df;
+  color: #1c2522;
+  display: grid;
+  gap: 12px;
+  justify-items: flex-start;
+  min-height: 220px;
+  padding: 24px;
+  text-align: left;
+}
+
+.choice-button svg {
+  color: #0b7a68;
+}
+
+.choice-button strong {
+  font-size: 1.45rem;
+}
+
+.choice-button span {
+  color: #62706a;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
 .topbar {
   align-items: flex-end;
   display: flex;
@@ -157,7 +201,8 @@ h3 {
 .input-grid,
 .comparison-grid,
 .review-flow,
-.builder-grid {
+.builder-grid,
+.page-grid {
   display: grid;
   gap: 16px;
 }
@@ -172,7 +217,9 @@ h3 {
 .insights-panel,
 .resume-preview,
 .builder-panel,
-.ai-architecture {
+.ai-architecture,
+.form-panel,
+.result-panel {
   background: #ffffff;
   border: 1px solid #dce5df;
   border-radius: 8px;
@@ -235,6 +282,10 @@ textarea {
   width: 100%;
 }
 
+.embedded textarea {
+  min-height: 220px;
+}
+
 input {
   border: 1px solid #dce5df;
   border-radius: 8px;
@@ -255,11 +306,29 @@ textarea:focus {
   margin-bottom: 16px;
 }
 
+.page-grid {
+  align-items: start;
+  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.9fr);
+}
+
+.form-panel {
+  overflow: hidden;
+}
+
 .form-grid {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   padding: 16px;
+}
+
+.form-grid label,
+.mini-form label {
+  color: #42504b;
+  display: grid;
+  font-size: 0.86rem;
+  font-weight: 800;
+  gap: 7px;
 }
 
 .form-grid textarea {
@@ -270,6 +339,10 @@ textarea:focus {
 .form-grid textarea:nth-of-type(1),
 .form-grid textarea:nth-of-type(2),
 .form-grid textarea:nth-of-type(3) {
+  grid-column: 1 / -1;
+}
+
+.form-grid label:has(textarea) {
   grid-column: 1 / -1;
 }
 
@@ -291,6 +364,10 @@ textarea:focus {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-bottom: 12px;
   padding: 12px;
+}
+
+.mini-form label:has(textarea) {
+  grid-column: 1 / -1;
 }
 
 .mini-form textarea {
@@ -375,6 +452,21 @@ pre {
   justify-content: flex-end;
 }
 
+.padded {
+  border-top: 1px solid #e5ece7;
+  padding: 16px;
+}
+
+.spin {
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .insights-panel {
   padding: 16px;
 }
@@ -451,6 +543,11 @@ pre {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.comparison-grid.stacked {
+  grid-template-columns: 1fr;
+  margin-top: 16px;
+}
+
 .resume-preview {
   padding: 16px;
 }
@@ -466,6 +563,11 @@ pre {
 
 .resume-preview pre {
   min-height: 420px;
+}
+
+.stacked .resume-preview pre {
+  max-height: 360px;
+  min-height: 220px;
 }
 
 .emphasized {
@@ -493,6 +595,30 @@ pre {
   color: #0b7a68;
 }
 
+.result-panel {
+  background: transparent;
+  border: 0;
+}
+
+.score-grid.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.status-message,
+.provider-label {
+  background: #ffffff;
+  border: 1px solid #dce5df;
+  border-radius: 8px;
+  color: #42504b;
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.provider-label {
+  color: #0b7a68;
+  font-weight: 800;
+}
+
 @media (max-width: 980px) {
   .topbar {
     align-items: flex-start;
@@ -503,7 +629,9 @@ pre {
   .input-grid,
   .review-flow,
   .comparison-grid,
-  .builder-grid {
+  .builder-grid,
+  .page-grid,
+  .choice-grid {
     grid-template-columns: 1fr;
   }
 }
