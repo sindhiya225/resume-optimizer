@@ -21,9 +21,57 @@ const STOP_WORDS = new Set([
   "internship",
   "software",
   "engineering",
+  "about",
+  "looking",
+  "directly",
+  "hands",
+  "hands-on",
+  "driven",
+  "contribute",
+  "building",
+  "block",
+  "team",
+  "teams",
+  "work",
+  "works",
+  "this",
+  "is",
+  "to",
+  "of",
+  "a",
+  "an",
+  "in",
+  "on",
+  "by",
+  "as",
+  "at",
+  "be",
+  "we",
+  "they",
+  "their",
+  "candidate",
+  "ideal",
+  "preferred",
+  "required",
+  "responsibilities",
+  "requirements",
 ]);
 
 const PRIORITY_TERMS = [
+  "ai",
+  "artificial intelligence",
+  "machine learning",
+  "product development",
+  "ai product development",
+  "technology execution",
+  "entrepreneurial mindset",
+  "ownership",
+  "gtm",
+  "go to market",
+  "hyper-scaler",
+  "hyperscaler",
+  "founding team",
+  "startup",
   "react",
   "typescript",
   "javascript",
@@ -56,7 +104,9 @@ const ACTION_VERBS = [
 
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9+#.\s-]/g, " ");
 
-const containsTerm = (text: string, term: string) => normalize(text).includes(normalize(term));
+const normalizeTerm = (value: string) => normalize(value).replace(/\s+/g, " ").trim();
+
+const containsTerm = (text: string, term: string) => normalizeTerm(text).includes(normalizeTerm(term));
 
 const unique = (items: string[]) => Array.from(new Set(items));
 
@@ -66,9 +116,12 @@ const extractTerms = (jobDescription: string) => {
   const wordTerms = normalizedJob
     .split(/\s+/)
     .map((word) => word.trim())
-    .filter((word) => word.length > 4 && !STOP_WORDS.has(word));
+    .filter((word) => word.length > 4 && !STOP_WORDS.has(word))
+    .filter((word) => !/^\d+$/.test(word))
+    .filter((word) => !word.includes("www"))
+    .filter((word) => !word.includes("@"));
 
-  return unique([...directTerms, ...wordTerms]).slice(0, 24);
+  return unique([...directTerms, ...wordTerms]).slice(0, 18);
 };
 
 const extractProjects = (resume: string) => {

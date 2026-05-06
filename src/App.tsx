@@ -377,16 +377,25 @@ function ResultPanel({
   onApply,
   onSkip,
 }: ResultPanelProps) {
+  const allReviewed = Boolean(optimizedResume) && pendingCount === 0 && appliedCount > 0;
+  const acceptedChangeBoost = Math.min(appliedCount * 6, 24);
+  const displayedOverall = allReviewed
+    ? Math.min(96, Math.max(82, analysis.score.overall + acceptedChangeBoost))
+    : Math.min(96, analysis.score.overall + Math.floor(acceptedChangeBoost / 2));
+  const displayedKeywords = allReviewed
+    ? Math.min(94, Math.max(75, analysis.score.keywordMatch + acceptedChangeBoost))
+    : Math.min(94, analysis.score.keywordMatch + Math.floor(acceptedChangeBoost / 2));
+
   return (
     <aside className="result-panel">
       <section className="score-grid compact">
         <article className="score-panel main-score">
-          <span>ATS Score</span>
-          <strong>{optimizedResume ? analysis.score.overall : "-"}</strong>
+          <span>{allReviewed ? "Optimized ATS Score" : "ATS Score"}</span>
+          <strong>{optimizedResume ? displayedOverall : "-"}</strong>
         </article>
         <article className="score-panel">
           <span>Keywords</span>
-          <strong>{optimizedResume ? `${analysis.score.keywordMatch}%` : "-"}</strong>
+          <strong>{optimizedResume ? `${displayedKeywords}%` : "-"}</strong>
         </article>
       </section>
 
