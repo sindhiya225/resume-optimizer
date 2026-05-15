@@ -93,6 +93,18 @@ API keys must not be placed inside React code because browser code is public. Th
 10. User approves the final resume.
 11. User downloads PDF or DOCX.
 
+## Screenshots
+
+### Build resume from scratch
+<img width="1881" height="864" alt="build" src="https://github.com/user-attachments/assets/f29f780a-dd2e-46d4-ac1e-0ec13fc098e2" />
+<img width="801" height="789" alt="suggestion" src="https://github.com/user-attachments/assets/0551eaf7-08db-415a-8559-e7d691f7947c" />
+<img width="836" height="853" alt="download" src="https://github.com/user-attachments/assets/22530d4b-2d21-469c-854a-b0e1bafa621d" />
+
+### Optimize existing resume
+<img width="1894" height="855" alt="optimize" src="https://github.com/user-attachments/assets/66eecb0b-f7be-403e-b9fd-19bda24f9d19" />
+<img width="871" height="800" alt="attach" src="https://github.com/user-attachments/assets/55e9867d-5844-441b-b0d2-18ee62749cc9" />
+<img width="698" height="425" alt="suggest" src="https://github.com/user-attachments/assets/4f899cae-1887-4ca3-b42f-eb354e477a1b" />
+
 ## Setup
 
 Create `.env` from `.env.example`:
